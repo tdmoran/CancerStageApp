@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCD Head and Neck Cancer Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ucd-blue: #002855;
+            --ucd-blue-light: #003c7d;
+            --ucd-gold: #DAAA00;
+            --ucd-gold-light: #f4c430;
+            --cream: #faf8f5;
+            --cream-dark: #f0ece4;
+            --charcoal: #2d2d2d;
+            --slate: #5a6672;
+            --t-color: #b44d4d;
+            --n-color: #4d7c4d;
+            --m-color: #c4942d;
+            --shadow-soft: 0 2px 8px rgba(0, 40, 85, 0.06);
+            --shadow-medium: 0 4px 20px rgba(0, 40, 85, 0.1);
+            --shadow-lift: 0 8px 30px rgba(0, 40, 85, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            color: var(--charcoal);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Subtle texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 0 0 48px;
+            position: relative;
+        }
+
+        .logo-container {
+            margin-bottom: 24px;
+        }
+
+        .header-logo {
+            max-width: 160px;
+            height: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .title-group {
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: var(--ucd-blue);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--slate);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .header-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ucd-gold), var(--ucd-gold-light));
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        /* Cards */
+        .card {
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0, 40, 85, 0.06);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--ucd-blue);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:focus-within::before,
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--cream-dark);
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--cream);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .card-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--ucd-blue);
+        }
+
+        .card-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--ucd-blue);
+        }
+
+        .card-step {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--slate);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Form Elements */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--slate);
+            letter-spacing: 0.02em;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 44px 14px 16px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--charcoal);
+            border: 1px solid #d4d8dc;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23002855' viewBox='0 0 16 16'%3E%3Cpath d='M8 10.5l-4-4h8l-4 4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        select:hover {
+            border-color: var(--ucd-blue-light);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--ucd-blue);
+            box-shadow: 0 0 0 3px rgba(0, 40, 85, 0.1);
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--cream);
+        }
+
+        /* TNM Grid */
+        .tnm-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .tnm-item {
+            text-align: center;
+            padding: 20px 12px;
+            background: var(--cream);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .tnm-item:has(select:focus) {
+            background: var(--cream-dark);
+        }
+
+        .tnm-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .tnm-badge::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            opacity: 0.2;
+        }
+
+        .tnm-badge.t {
+            background: rgba(180, 77, 77, 0.1);
+            color: var(--t-color);
+        }
+
+        .tnm-badge.n {
+            background: rgba(77, 124, 77, 0.1);
+            color: var(--n-color);
+        }
+
+        .tnm-badge.m {
+            background: rgba(196, 148, 45, 0.1);
+            color: var(--m-color);
+        }
+
+        .tnm-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--slate);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .tnm-item select {
+            font-size: 0.85rem;
+            padding: 10px 36px 10px 12px;
+        }
+
+        /* Result Card */
+        #result-card {
+            display: none;
+            background: linear-gradient(135deg, #ffffff 0%, var(--cream) 100%);
+            border: 2px solid var(--ucd-gold);
+            transform: translateY(10px);
+            opacity: 0;
+        }
+
+        #result-card.show {
+            display: block;
+            animation: resultReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes resultReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #result-card::before {
+            display: none;
+        }
+
+        .result-content {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .stage-circle {
+            flex-shrink: 0;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--ucd-blue);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 40, 85, 0.25);
+        }
+
+        .stage-circle::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid var(--ucd-gold);
+        }
+
+        .stage-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2px;
+        }
+
+        .stage-value {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .result-details {
+            flex: 1;
+        }
+
+        .result-title {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--ucd-blue);
+            margin-bottom: 4px;
+        }
+
+        .result-description {
+            font-size: 0.95rem;
+            color: var(--slate);
+            margin-bottom: 16px;
+        }
+
+        .tnm-summary {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tnm-summary-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: #ffffff;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid var(--cream-dark);
+        }
+
+        .tnm-summary-item .tnm-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .tnm-summary-item .tnm-dot.t { background: var(--t-color); }
+        .tnm-summary-item .tnm-dot.n { background: var(--n-color); }
+        .tnm-summary-item .tnm-dot.m { background: var(--m-color); }
+
+        /* Disclaimer */
+        .disclaimer {
+            background: rgba(0, 40, 85, 0.03);
+            border-left: 3px solid var(--ucd-blue);
+            padding: 16px 20px;
+            margin-top: 32px;
+            font-size: 0.8rem;
+            color: var(--slate);
+            line-height: 1.7;
+        }
+
+        .disclaimer strong {
+            color: var(--ucd-blue);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0 0;
+            color: var(--slate);
+            font-size: 0.8rem;
+        }
+
+        .footer-line {
+            width: 40px;
+            height: 2px;
+            background: var(--cream-dark);
+            margin: 0 auto 16px;
+        }
+
+        .ajcc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #ffffff;
+            border-radius: 4px;
+            border: 1px solid var(--cream-dark);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            color: var(--charcoal);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px 40px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .card {
+                padding: 24px 20px;
+            }
+
+            .tnm-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .tnm-item {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                text-align: left;
+                padding: 16px;
+            }
+
+            .tnm-badge {
+                margin-bottom: 0;
+                width: 44px;
+                height: 44px;
+                font-size: 1.25rem;
+            }
+
+            .tnm-content {
+                flex: 1;
+            }
+
+            .tnm-title {
+                margin-bottom: 8px;
+            }
+
+            .result-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 24px;
+            }
+
+            .stage-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .stage-value {
+                font-size: 2rem;
+            }
+
+            .tnm-summary {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            body::before {
+                display: none;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="UCDLogo.png" alt="UC Davis Health" class="header-logo">
+            </div>
+            <div class="title-group">
+                <h1>Head and Neck Cancer Calculator</h1>
+                <p class="subtitle">AJCC 8th Edition Staging</p>
+            </div>
+            <div class="header-line"></div>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-step">Step 1</div>
+                    <div class="card-title">Select Cancer Type</div>
+                </div>
+            </div>
+            <label for="cancer-type">Primary Site</label>
+            <select id="cancer-type">
+                <option value="">Choose primary site...</option>
+                <option value="oral-cavity">Oral Cavity</option>
+                <option value="oropharynx-p16-negative">Oropharynx (p16-negative)</option>
+                <option value="oropharynx-p16-positive">Oropharynx (p16-positive / HPV-associated)</option>
+                <option value="hypopharynx">Hypopharynx</option>
+                <option value="larynx-supraglottic">Larynx - Supraglottic</option>
+                <option value="larynx-glottic">Larynx - Glottic</option>
+                <option value="larynx-subglottic">Larynx - Subglottic</option>
+                <option value="nasopharynx">Nasopharynx</option>
+                <option value="nasal-cavity">Nasal Cavity & Paranasal Sinuses</option>
+                <option value="salivary-glands">Major Salivary Glands</option>
+                <option value="thyroid-differentiated">Thyroid - Differentiated (age &lt; 55)</option>
+                <option value="thyroid-differentiated-55">Thyroid - Differentiated (age &ge; 55)</option>
+                <option value="thyroid-medullary">Thyroid - Medullary</option>
+                <option value="thyroid-anaplastic">Thyroid - Anaplastic</option>
+                <option value="cutaneous-scc">Cutaneous SCC of Head & Neck</option>
+                <option value="melanoma">Melanoma of Head & Neck</option>
+            </select>
+        </div>
+
+        <div class="card" id="tnm-card" style="display: none;">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-step">Step 2</div>
+                    <div class="card-title">TNM Classification</div>
+                </div>
+            </div>
+            <div class="tnm-grid">
+                <div class="tnm-item">
+                    <div class="tnm-badge t">T</div>
+                    <div class="tnm-content">
+                        <div class="tnm-title">Primary Tumor</div>
+                        <select id="t-stage" disabled>
+                            <option value="">Select T</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tnm-item">
+                    <div class="tnm-badge n">N</div>
+                    <div class="tnm-content">
+                        <div class="tnm-title">Regional Nodes</div>
+                        <select id="n-stage" disabled>
+                            <option value="">Select N</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="tnm-item">
+                    <div class="tnm-badge m">M</div>
+                    <div class="tnm-content">
+                        <div class="tnm-title">Distant Metastasis</div>
+                        <select id="m-stage" disabled>
+                            <option value="">Select M</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="result-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="card-step">Result</div>
+                    <div class="card-title">Staging Assessment</div>
+                </div>
+            </div>
+            <div class="result-content">
+                <div class="stage-circle">
+                    <span class="stage-label">Stage</span>
+                    <span class="stage-value" id="stage-output">--</span>
+                </div>
+                <div class="result-details">
+                    <div class="result-title" id="stage-title">Clinical Stage</div>
+                    <div class="result-description" id="stage-description"></div>
+                    <div class="tnm-summary">
+                        <span class="tnm-summary-item"><span class="tnm-dot t"></span><span id="summary-t">T: --</span></span>
+                        <span class="tnm-summary-item"><span class="tnm-dot n"></span><span id="summary-n">N: --</span></span>
+                        <span class="tnm-summary-item"><span class="tnm-dot m"></span><span id="summary-m">M: --</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>Clinical Disclaimer:</strong> This calculator is intended for educational purposes and clinical decision support only. Staging determinations should be made by qualified healthcare professionals using complete patient information, imaging studies, and current AJCC guidelines.
+        </div>
+
+        <footer>
+            <div class="footer-line"></div>
+            <div class="ajcc-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                AJCC Cancer Staging Manual, 8th Edition
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Staging data for each cancer type
+        const stagingData = {
+            'oral-cavity': {
+                name: 'Oral Cavity',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Tumor ≤2 cm, DOI ≤5 mm' },
+                    { value: 'T2', label: 'T2 - Tumor ≤2 cm DOI >5-10 mm, or >2-4 cm DOI ≤10 mm' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm or DOI >10 mm' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'oropharynx-p16-negative': {
+                name: 'Oropharynx (p16-negative)',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Tumor ≤2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm or epiglottic extension' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'oropharynx-p16-positive': {
+                name: 'Oropharynx (p16-positive / HPV-associated)',
+                t: [
+                    { value: 'T0', label: 'T0 - No primary identified' },
+                    { value: 'T1', label: 'T1 - Tumor ≤2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm or epiglottic extension' },
+                    { value: 'T4', label: 'T4 - Moderately advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - One or more ipsilateral ≤6 cm' },
+                    { value: 'N2', label: 'N2 - Contralateral or bilateral ≤6 cm' },
+                    { value: 'N3', label: 'N3 - Any node >6 cm' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'T0-N0-M0': 'I',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'I',
+                    'T0-N1-M0': 'I',
+                    'T1-N1-M0': 'I',
+                    'T2-N1-M0': 'I',
+                    'T3-N0-M0': 'II',
+                    'T3-N1-M0': 'II',
+                    'T0-N2-M0': 'II',
+                    'T1-N2-M0': 'II',
+                    'T2-N2-M0': 'II',
+                    'T3-N2-M0': 'II',
+                    'T4-N0-M0': 'III',
+                    'T4-N1-M0': 'III',
+                    'T4-N2-M0': 'III',
+                    'any-N3-M0': 'III',
+                    'any-any-M1': 'IV'
+                }
+            },
+            'hypopharynx': {
+                name: 'Hypopharynx',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Tumor limited to one subsite, ≤2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm or >1 subsite' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm or hemilarynx fixation' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'larynx-supraglottic': {
+                name: 'Larynx - Supraglottic',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Limited to one subsite, normal cord mobility' },
+                    { value: 'T2', label: 'T2 - Invades >1 subsite or adjacent region' },
+                    { value: 'T3', label: 'T3 - Cord fixation or pre-epiglottic/paraglottic invasion' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'larynx-glottic': {
+                name: 'Larynx - Glottic',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1a', label: 'T1a - Limited to one vocal cord' },
+                    { value: 'T1b', label: 'T1b - Involves both vocal cords' },
+                    { value: 'T2', label: 'T2 - Extends to supraglottis/subglottis, impaired mobility' },
+                    { value: 'T3', label: 'T3 - Cord fixation or paraglottic/inner cortex invasion' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1a-N0-M0': 'I',
+                    'T1b-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1a-N1-M0': 'III',
+                    'T1b-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1a-N2-M0': 'IVA',
+                    'T1b-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'larynx-subglottic': {
+                name: 'Larynx - Subglottic',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Limited to subglottis' },
+                    { value: 'T2', label: 'T2 - Extends to vocal cord(s)' },
+                    { value: 'T3', label: 'T3 - Cord fixation' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'nasopharynx': {
+                name: 'Nasopharynx',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Nasopharynx, oropharynx, or nasal cavity' },
+                    { value: 'T2', label: 'T2 - Parapharyngeal extension' },
+                    { value: 'T3', label: 'T3 - Skull base or paranasal sinuses' },
+                    { value: 'T4', label: 'T4 - Intracranial, cranial nerves, hypopharynx, orbit' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Unilateral cervical/retropharyngeal ≤6 cm above clavicle' },
+                    { value: 'N2', label: 'N2 - Bilateral cervical ≤6 cm above clavicle' },
+                    { value: 'N3', label: 'N3 - >6 cm and/or below clavicle' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T1-N1-M0': 'II',
+                    'T2-N0-M0': 'II',
+                    'T2-N1-M0': 'II',
+                    'T1-N2-M0': 'III',
+                    'T2-N2-M0': 'III',
+                    'T3-N0-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T3-N2-M0': 'III',
+                    'T4-N0-M0': 'IVA',
+                    'T4-N1-M0': 'IVA',
+                    'T4-N2-M0': 'IVA',
+                    'any-N3-M0': 'IVA',
+                    'any-any-M1': 'IVB'
+                }
+            },
+            'nasal-cavity': {
+                name: 'Nasal Cavity & Paranasal Sinuses',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Limited to one subsite' },
+                    { value: 'T2', label: 'T2 - Two subsites or adjacent nasoethmoidal site' },
+                    { value: 'T3', label: 'T3 - Medial orbit, maxillary sinus floor/palate' },
+                    { value: 'T4a', label: 'T4a - Moderately advanced local disease' },
+                    { value: 'T4b', label: 'T4b - Very advanced local disease' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'salivary-glands': {
+                name: 'Major Salivary Glands',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Tumor ≤2 cm without extraparenchymal extension' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm without extraparenchymal extension' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm and/or extraparenchymal extension' },
+                    { value: 'T4a', label: 'T4a - Skin, mandible, ear canal, facial nerve' },
+                    { value: 'T4b', label: 'T4b - Skull base, pterygoid plates, carotid artery' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'thyroid-differentiated': {
+                name: 'Thyroid - Differentiated (age < 55)',
+                t: [
+                    { value: 'T1a', label: 'T1a - Tumor ≤1 cm' },
+                    { value: 'T1b', label: 'T1b - Tumor >1-2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm limited to thyroid' },
+                    { value: 'T3a', label: 'T3a - Tumor >4 cm limited to thyroid' },
+                    { value: 'T3b', label: 'T3b - Gross extrathyroidal extension to strap muscles' },
+                    { value: 'T4a', label: 'T4a - Gross extension beyond strap muscles' },
+                    { value: 'T4b', label: 'T4b - Prevertebral fascia, carotid, mediastinal vessels' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1a', label: 'N1a - Level VI or VII nodes' },
+                    { value: 'N1b', label: 'N1b - Other unilateral, bilateral, or contralateral nodes' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'any-any-M0': 'I',
+                    'any-any-M1': 'II'
+                }
+            },
+            'thyroid-differentiated-55': {
+                name: 'Thyroid - Differentiated (age >= 55)',
+                t: [
+                    { value: 'T1a', label: 'T1a - Tumor ≤1 cm' },
+                    { value: 'T1b', label: 'T1b - Tumor >1-2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm limited to thyroid' },
+                    { value: 'T3a', label: 'T3a - Tumor >4 cm limited to thyroid' },
+                    { value: 'T3b', label: 'T3b - Gross extrathyroidal extension to strap muscles' },
+                    { value: 'T4a', label: 'T4a - Gross extension beyond strap muscles' },
+                    { value: 'T4b', label: 'T4b - Prevertebral fascia, carotid, mediastinal vessels' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1a', label: 'N1a - Level VI or VII nodes' },
+                    { value: 'N1b', label: 'N1b - Other unilateral, bilateral, or contralateral nodes' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'T1a-N0-M0': 'I',
+                    'T1b-N0-M0': 'I',
+                    'T2-N0-M0': 'I',
+                    'T1a-N1-M0': 'II',
+                    'T1b-N1-M0': 'II',
+                    'T2-N1-M0': 'II',
+                    'T3a-N0-M0': 'II',
+                    'T3a-N1-M0': 'II',
+                    'T3b-N0-M0': 'II',
+                    'T3b-N1-M0': 'II',
+                    'T4a-N0-M0': 'III',
+                    'T4a-N1-M0': 'III',
+                    'T4b-any-M0': 'IVA',
+                    'any-any-M1': 'IVB'
+                }
+            },
+            'thyroid-medullary': {
+                name: 'Thyroid - Medullary',
+                t: [
+                    { value: 'T1a', label: 'T1a - Tumor ≤1 cm' },
+                    { value: 'T1b', label: 'T1b - Tumor >1-2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm limited to thyroid' },
+                    { value: 'T3a', label: 'T3a - Tumor >4 cm limited to thyroid' },
+                    { value: 'T3b', label: 'T3b - Gross extrathyroidal extension to strap muscles' },
+                    { value: 'T4a', label: 'T4a - Gross extension beyond strap muscles' },
+                    { value: 'T4b', label: 'T4b - Prevertebral fascia, carotid, mediastinal vessels' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1a', label: 'N1a - Level VI or VII nodes' },
+                    { value: 'N1b', label: 'N1b - Other unilateral, bilateral, or contralateral nodes' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'T1a-N0-M0': 'I',
+                    'T1b-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3a-N0-M0': 'II',
+                    'T1a-N1a-M0': 'III',
+                    'T1b-N1a-M0': 'III',
+                    'T2-N1a-M0': 'III',
+                    'T3a-N1a-M0': 'III',
+                    'T3b-N0-M0': 'III',
+                    'T3b-N1a-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1a-M0': 'IVA',
+                    'T1a-N1b-M0': 'IVA',
+                    'T1b-N1b-M0': 'IVA',
+                    'T2-N1b-M0': 'IVA',
+                    'T3a-N1b-M0': 'IVA',
+                    'T3b-N1b-M0': 'IVA',
+                    'T4a-N1b-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'thyroid-anaplastic': {
+                name: 'Thyroid - Anaplastic',
+                t: [
+                    { value: 'T1a', label: 'T1a - Tumor ≤1 cm' },
+                    { value: 'T1b', label: 'T1b - Tumor >1-2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor >2-4 cm limited to thyroid' },
+                    { value: 'T3a', label: 'T3a - Tumor >4 cm limited to thyroid' },
+                    { value: 'T3b', label: 'T3b - Gross extrathyroidal extension to strap muscles' },
+                    { value: 'T4a', label: 'T4a - Gross extension beyond strap muscles' },
+                    { value: 'T4b', label: 'T4b - Prevertebral fascia, carotid, mediastinal vessels' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1a', label: 'N1a - Level VI or VII nodes' },
+                    { value: 'N1b', label: 'N1b - Other unilateral, bilateral, or contralateral nodes' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'T1a-N0-M0': 'IVA',
+                    'T1b-N0-M0': 'IVA',
+                    'T2-N0-M0': 'IVA',
+                    'T3a-N0-M0': 'IVA',
+                    'T3b-N0-M0': 'IVA',
+                    'any-N1-M0': 'IVB',
+                    'T4a-any-M0': 'IVB',
+                    'T4b-any-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'cutaneous-scc': {
+                name: 'Cutaneous SCC of Head & Neck',
+                t: [
+                    { value: 'Tis', label: 'Tis - Carcinoma in situ' },
+                    { value: 'T1', label: 'T1 - Tumor <2 cm' },
+                    { value: 'T2', label: 'T2 - Tumor ≥2-4 cm' },
+                    { value: 'T3', label: 'T3 - Tumor >4 cm or minor bone erosion/perineural invasion' },
+                    { value: 'T4a', label: 'T4a - Gross cortical bone or marrow invasion' },
+                    { value: 'T4b', label: 'T4b - Skull base or axial skeleton involvement' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1', label: 'N1 - Single ipsilateral ≤3 cm, ENE(-)' },
+                    { value: 'N2a', label: 'N2a - Single ipsilateral >3-6 cm, ENE(-)' },
+                    { value: 'N2b', label: 'N2b - Multiple ipsilateral ≤6 cm, ENE(-)' },
+                    { value: 'N2c', label: 'N2c - Bilateral/contralateral ≤6 cm, ENE(-)' },
+                    { value: 'N3a', label: 'N3a - Any node >6 cm, ENE(-)' },
+                    { value: 'N3b', label: 'N3b - Any node(s) with ENE(+)' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1', label: 'M1 - Distant metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1-N0-M0': 'I',
+                    'T2-N0-M0': 'II',
+                    'T3-N0-M0': 'III',
+                    'T1-N1-M0': 'III',
+                    'T2-N1-M0': 'III',
+                    'T3-N1-M0': 'III',
+                    'T4a-N0-M0': 'IVA',
+                    'T4a-N1-M0': 'IVA',
+                    'T1-N2-M0': 'IVA',
+                    'T2-N2-M0': 'IVA',
+                    'T3-N2-M0': 'IVA',
+                    'T4a-N2-M0': 'IVA',
+                    'T4b-any-M0': 'IVB',
+                    'any-N3-M0': 'IVB',
+                    'any-any-M1': 'IVC'
+                }
+            },
+            'melanoma': {
+                name: 'Melanoma of Head & Neck',
+                t: [
+                    { value: 'Tis', label: 'Tis - Melanoma in situ' },
+                    { value: 'T1a', label: 'T1a - <0.8 mm without ulceration' },
+                    { value: 'T1b', label: 'T1b - <0.8 mm with ulceration, or 0.8-1.0 mm' },
+                    { value: 'T2a', label: 'T2a - >1.0-2.0 mm without ulceration' },
+                    { value: 'T2b', label: 'T2b - >1.0-2.0 mm with ulceration' },
+                    { value: 'T3a', label: 'T3a - >2.0-4.0 mm without ulceration' },
+                    { value: 'T3b', label: 'T3b - >2.0-4.0 mm with ulceration' },
+                    { value: 'T4a', label: 'T4a - >4.0 mm without ulceration' },
+                    { value: 'T4b', label: 'T4b - >4.0 mm with ulceration' }
+                ],
+                n: [
+                    { value: 'N0', label: 'N0 - No regional lymph node metastasis' },
+                    { value: 'N1a', label: 'N1a - 1 clinically occult node' },
+                    { value: 'N1b', label: 'N1b - 1 clinically detected node' },
+                    { value: 'N1c', label: 'N1c - No nodes, in-transit/satellite mets' },
+                    { value: 'N2a', label: 'N2a - 2-3 clinically occult nodes' },
+                    { value: 'N2b', label: 'N2b - 2-3 clinically detected nodes' },
+                    { value: 'N2c', label: 'N2c - 1 node + in-transit/satellite mets' },
+                    { value: 'N3a', label: 'N3a - ≥4 clinically occult nodes' },
+                    { value: 'N3b', label: 'N3b - ≥4 clinically detected nodes or matted' },
+                    { value: 'N3c', label: 'N3c - ≥2 nodes + in-transit/satellite mets' }
+                ],
+                m: [
+                    { value: 'M0', label: 'M0 - No distant metastasis' },
+                    { value: 'M1a', label: 'M1a - Distant skin, soft tissue, or distant LN mets' },
+                    { value: 'M1b', label: 'M1b - Lung metastasis' },
+                    { value: 'M1c', label: 'M1c - Non-CNS visceral metastasis' },
+                    { value: 'M1d', label: 'M1d - CNS metastasis' }
+                ],
+                staging: {
+                    'Tis-N0-M0': '0',
+                    'T1a-N0-M0': 'IA',
+                    'T1b-N0-M0': 'IA',
+                    'T2a-N0-M0': 'IB',
+                    'T2b-N0-M0': 'IIA',
+                    'T3a-N0-M0': 'IIA',
+                    'T3b-N0-M0': 'IIB',
+                    'T4a-N0-M0': 'IIB',
+                    'T4b-N0-M0': 'IIC',
+                    'any-N1-M0': 'III',
+                    'any-N2-M0': 'III',
+                    'any-N3-M0': 'III',
+                    'any-any-M1': 'IV'
+                }
+            }
+        };
+
+        // DOM elements
+        const cancerTypeSelect = document.getElementById('cancer-type');
+        const tnmCard = document.getElementById('tnm-card');
+        const tSelect = document.getElementById('t-stage');
+        const nSelect = document.getElementById('n-stage');
+        const mSelect = document.getElementById('m-stage');
+        const resultCard = document.getElementById('result-card');
+        const stageOutput = document.getElementById('stage-output');
+        const stageTitle = document.getElementById('stage-title');
+        const stageDescription = document.getElementById('stage-description');
+        const summaryT = document.getElementById('summary-t');
+        const summaryN = document.getElementById('summary-n');
+        const summaryM = document.getElementById('summary-m');
+
+        // Populate select options
+        function populateSelect(selectElement, options) {
+            selectElement.innerHTML = '<option value="">Select...</option>';
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.label;
+                selectElement.appendChild(option);
+            });
+            selectElement.disabled = false;
+        }
+
+        // Calculate stage based on TNM
+        function calculateStage(cancerType, t, n, m) {
+            const data = stagingData[cancerType];
+            if (!data) return null;
+
+            // Normalize values for lookup
+            const tBase = t.replace(/[ab]$/, '');
+            const nBase = n.replace(/[abc]$/, '');
+
+            // Try exact match first
+            let key = `${t}-${n}-${m}`;
+            if (data.staging[key]) return data.staging[key];
+
+            // Try with base N (for N1a, N1b -> N1)
+            key = `${t}-${nBase}-${m}`;
+            if (data.staging[key]) return data.staging[key];
+
+            // Try with base T
+            key = `${tBase}-${n}-${m}`;
+            if (data.staging[key]) return data.staging[key];
+
+            // Try with both bases
+            key = `${tBase}-${nBase}-${m}`;
+            if (data.staging[key]) return data.staging[key];
+
+            // Try wildcard patterns
+            // M1 usually overrides everything
+            if (m === 'M1' && data.staging['any-any-M1']) {
+                return data.staging['any-any-M1'];
+            }
+
+            // Check for any-N3 patterns
+            if (n.startsWith('N3') && data.staging['any-N3-M0']) {
+                return data.staging['any-N3-M0'];
+            }
+
+            // Check for T4b-any patterns
+            if (t === 'T4b' && data.staging['T4b-any-M0']) {
+                return data.staging['T4b-any-M0'];
+            }
+
+            // Check for any-N1 patterns (thyroid anaplastic)
+            if (n.startsWith('N1') && data.staging['any-N1-M0']) {
+                return data.staging['any-N1-M0'];
+            }
+
+            // Check for T4a-any patterns
+            if (t === 'T4a' && data.staging['T4a-any-M0']) {
+                return data.staging['T4a-any-M0'];
+            }
+
+            // Check for any-any-M0 (thyroid differentiated <55)
+            if (m === 'M0' && data.staging['any-any-M0']) {
+                return data.staging['any-any-M0'];
+            }
+
+            // Check N2 patterns (for any N2 substage)
+            if (n.startsWith('N2')) {
+                const n2Keys = Object.keys(data.staging).filter(k =>
+                    k.startsWith(t) && k.includes('N2') && k.endsWith(m)
+                );
+                if (n2Keys.length > 0) return data.staging[n2Keys[0]];
+
+                const anyN2Keys = Object.keys(data.staging).filter(k =>
+                    k.includes('any-N2') || (k.startsWith(tBase) && k.includes('N2'))
+                );
+                if (anyN2Keys.length > 0) return data.staging[anyN2Keys[0]];
+            }
+
+            // Check N1 patterns
+            if (n.startsWith('N1')) {
+                const n1Keys = Object.keys(data.staging).filter(k =>
+                    k.startsWith(t) && k.includes('N1') && k.endsWith(m)
+                );
+                if (n1Keys.length > 0) return data.staging[n1Keys[0]];
+            }
+
+            return 'Unable to determine';
+        }
+
+        // Get stage description
+        function getStageDescription(stage) {
+            const descriptions = {
+                '0': 'Carcinoma in situ',
+                'I': 'Early stage, localized disease',
+                'IA': 'Early stage, very low risk',
+                'IB': 'Early stage, low risk',
+                'II': 'Localized disease with some extension',
+                'IIA': 'Localized with moderate features',
+                'IIB': 'Localized with higher risk features',
+                'IIC': 'Localized with highest risk features',
+                'III': 'Locally advanced disease',
+                'IVA': 'Advanced disease, potentially resectable',
+                'IVB': 'Very advanced or distant metastatic disease',
+                'IVC': 'Distant metastatic disease',
+                'IV': 'Metastatic disease'
+            };
+            return descriptions[stage] || '';
+        }
+
+        // Event listeners
+        cancerTypeSelect.addEventListener('change', function() {
+            const cancerType = this.value;
+
+            if (cancerType && stagingData[cancerType]) {
+                const data = stagingData[cancerType];
+                populateSelect(tSelect, data.t);
+                populateSelect(nSelect, data.n);
+                populateSelect(mSelect, data.m);
+                tnmCard.style.display = 'block';
+                resultCard.classList.remove('show');
+            } else {
+                tnmCard.style.display = 'none';
+                resultCard.classList.remove('show');
+                tSelect.disabled = true;
+                nSelect.disabled = true;
+                mSelect.disabled = true;
+            }
+        });
+
+        function updateResult() {
+            const cancerType = cancerTypeSelect.value;
+            const t = tSelect.value;
+            const n = nSelect.value;
+            const m = mSelect.value;
+
+            if (cancerType && t && n && m) {
+                const stage = calculateStage(cancerType, t, n, m);
+                const cancerName = stagingData[cancerType].name;
+                stageOutput.textContent = stage;
+                stageTitle.textContent = `${cancerName} - Clinical Stage`;
+                stageDescription.textContent = getStageDescription(stage);
+                summaryT.textContent = t;
+                summaryN.textContent = n;
+                summaryM.textContent = m;
+                resultCard.classList.add('show');
+            } else {
+                resultCard.classList.remove('show');
+            }
+        }
+
+        tSelect.addEventListener('change', updateResult);
+        nSelect.addEventListener('change', updateResult);
+        mSelect.addEventListener('change', updateResult);
+    </script>
+</body>
+</html>
